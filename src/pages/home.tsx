@@ -32,7 +32,7 @@ export default function Home() {
               <p>Miscellaneous generative art projects. <a href="https://generative-art-chi.vercel.app" target="_blank" rel="noreferrer">View here</a>.</p>
             </div>
           </div>
-          <h3>Blog</h3>
+          <h3></h3>
           <BlogList />
         </article>
     </div>
