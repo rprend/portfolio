@@ -56,8 +56,8 @@ async function buildPosts() {
   export const blogRoutes = [
   ${files.map(file => {
     const componentName = path.basename(file, '.md')
-    return `{ path: '/blog/${postsMetadata[componentName].slug}', component: () => blogPost({ blogComponent: ${componentName} }) },`
-  }).join(',\n')}
+    return `{ path: '/blog/${postsMetadata[componentName].slug}', component: () => blogPost({ blogComponent: ${componentName}, name: '${componentName}' }) },`
+  }).join('\n')}
   ]
   `
 
