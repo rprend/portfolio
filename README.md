@@ -1,41 +1,9 @@
-## Usage
+## Static site blog
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+Started from the "ts-router" template on the solidJS repo: https://github.com/solidjs/templates. It is convenient because it sets up routing, tailwind, and typescript.
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
+`pnpm run dev` to run the site.
 
-```bash
-$ npm install # or pnpm install or yarn install
-```
+However, there is a second script, `pnpm run buildPosts` which runs the script in scripts/buildPosts.ts. This converts all of the markdown files in `/posts` to JSX Components in `pages/generatedPosts`. It also creates two more typescript files: `blogRoutes.ts` which has a list of slugs -> Components which is consumed by `routes.ts`. The second file is `postsMetadata`, a global object containing the metadata for all blog posts.
 
-## Exploring the template
-
-This template's goal is to showcase the routing features of Solid.
-It also showcase how the router and Suspense work together to parallelize data fetching tied to a route via the `.data.ts` pattern.
-
-You can learn more about it on the [`@solidjs/router` repository](https://github.com/solidjs/solid-router)
-
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm run dev` or `npm start`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
+Yes im sure it's evil and suboptimal to generate client code with templated strings in a script. For one, it relies on the script hardcoding folder structures. But i don't care.
