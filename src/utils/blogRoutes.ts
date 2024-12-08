@@ -4,6 +4,7 @@ import bookReviews from '../pages/generatedPosts/bookReviews'
 import bookshelf from '../pages/generatedPosts/bookshelf'
 import contraThematicAnalysis from '../pages/generatedPosts/contraThematicAnalysis'
 import fragility from '../pages/generatedPosts/fragility'
+import lacanBookReview from '../pages/generatedPosts/lacanBookReview'
 
 export const blogRoutes = [
   {
@@ -26,5 +27,10 @@ export const blogRoutes = [
   {
     path: '/blog/fragility',
     component: () => blogPost({ blogComponent: fragility, name: 'fragility' }),
+  },
+  {
+    path: '/blog/lacan-book-review',
+    component: () =>
+      blogPost({ blogComponent: lacanBookReview, name: 'lacanBookReview' }),
   },
 ]

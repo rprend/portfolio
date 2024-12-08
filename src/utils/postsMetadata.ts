@@ -15,5 +15,10 @@ const postsMetadata = {
     date: '04-20-2024',
     slug: 'fragility',
   },
+  lacanBookReview: {
+    title: 'Book Review- Lacan by Lionel Bailey',
+    date: '12-08-2024',
+    slug: 'lacan-book-review',
+  },
 }
 export default postsMetadata

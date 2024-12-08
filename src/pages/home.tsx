@@ -3,7 +3,6 @@ import postsMetadata from '../utils/postsMetadata';
 import { A } from '@solidjs/router';
 import BlogList from '../components/BlogList';
 import Navbar from '../components/NavBar';
-// import { Title } from "@solidjs/meta";
 
 
 export default function Home() {
