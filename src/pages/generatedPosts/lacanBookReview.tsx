@@ -2,6 +2,7 @@ export default function lacanBookReview() {
   return (
     <div>
       <article class="prose">
+        <h1>Book Review- Lacan by Lionel Bailey</h1>
         <p>
           There is a contradiction in human desire, which prevents a simple
           answer to the simple question &quot;What do you want&quot;? From
@@ -221,10 +222,11 @@ export default function lacanBookReview() {
         </p>
         <p>
           <code>S1 / s1 x S2 / s2 -&gt; S2 / (S1 / s1)</code>
-          S1- signifier of the mother&#39;s desire s1- signified idea of the
-          object of mother’s desire, phallus S2- Signifier of the father s2-
-          signified idea of the father
         </p>
+        <p>S1- signifier of the mother&#39;s desire</p>
+        <p>s1- signified idea of the object of mother’s desire, phallus</p>
+        <p>S2- Signifier of the father</p>
+        <p>s2- signified idea of the father</p>
         <p>
           We didn&#39;t even touch his primary source for all this theory, which
           is psychoanalysis. Lacan worked his whole life split between the

@@ -4,6 +4,8 @@ date: "12-08-2024"
 slug: "lacan-book-review"
 ---
 
+# Book Review- Lacan by Lionel Bailey
+
 There is a contradiction in human desire, which prevents a simple answer to the simple question "What do you want"? From apathy over what to eat for dinner, to torturous dissatisfaction on what to do with your life, uncertainty plagues humanity. It's so intuitive it seems natural, but it's not obvious why. Surely, the animal who knows what he wants-- whether food, activity, or entertainment-- would outcompete the anxious one, plagued by uncertainty? Yet humans, the most uncertain of creatures, thrive. why?
 
 Even people who do sit down and reflect and think really hard and try to come up with an answer for "what do I want, fundamentally" come up frustratingly short. They tend to speak in dubious negations, write down maxims like "being is where it is not", and become religious or meditators or psychedelics. Lost to the world of woo.
@@ -65,9 +67,13 @@ Desire grows around objects that fulfill a psychological need rather than a phys
 I skipped a bunch-- this is the starting point of Lacan's theory of consciousness and desire. His writing quickly get wordy and complex: for example, he plots the topological vector-space of all aspects of desire, the three dimensions being the Real, the Imaginary, and the Symbolic. He was a fan of pseudo-mathematical formulations of metaphorical processes. His precise definition of the paternal metaphor is:
 
 `S1 / s1 x S2 / s2 -> S2 / (S1 / s1)`
+
 S1- signifier of the mother's desire
+
 s1- signified idea of the object of mother’s desire, phallus
+
 S2- Signifier of the father
+
 s2- signified idea of the father
 
 We didn't even touch his primary source for all this theory, which is psychoanalysis. Lacan worked his whole life split between the university in seminar and the insane asylum, attempting to understand and cure France's craziest patients. His practice would appear to those familiar with "Therapy" (CBT) weird, bizarre, and unscientific, with a mostly silent Lacan interjecting with puns or nonsense phrases, and sessions ending seemingly randomly. Take [this clip](https://www.youtube.com/watch?v=VA-SXCGwLvY) of a former patient of his, recalling how he interjected her session with a pun on Gestapo and "geste à peau" (gesture), and that moment cured her.
