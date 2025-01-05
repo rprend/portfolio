@@ -8,6 +8,7 @@ import Contact from "./pages/contact";
 import BlogPost from "./pages/blogPost";
 import BlogSubmit from "./pages/blogSubmit";
 import BlogDelete from "./pages/blogDelete";
+import Guestbook from "./pages/guestbook";
 
 export const routes: RouteDefinition[] = [
   {
@@ -33,6 +34,10 @@ export const routes: RouteDefinition[] = [
   {
     path: "/blog/delete",
     component: BlogDelete,
+  },
+  {
+    path: "/guestbook",
+    component: Guestbook,
   },
   {
     path: "**",

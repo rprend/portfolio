@@ -87,6 +87,18 @@ function calculateReadTime(content) {
 }
 __name(calculateReadTime, "calculateReadTime");
 __name2(calculateReadTime, "calculateReadTime");
+async function isGuestbookRateLimited(ip, env) {
+  const key = `guestbook_rate_limit:${ip}`;
+  const lastSubmission = await env.BLOG_CONTENT.get(key);
+  if (!lastSubmission) {
+    return false;
+  }
+  const lastTime = parseInt(lastSubmission);
+  const thirtyMinutesAgo = Date.now() - 60 * 60 * 1e3;
+  return lastTime > thirtyMinutesAgo;
+}
+__name(isGuestbookRateLimited, "isGuestbookRateLimited");
+__name2(isGuestbookRateLimited, "isGuestbookRateLimited");
 var onRequest = /* @__PURE__ */ __name2(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -123,6 +135,18 @@ var onRequest = /* @__PURE__ */ __name2(async (context) => {
         }
         return new Response(JSON.stringify(post), {
           headers: { "Content-Type": "application/json" }
+        });
+      }
+      case "guestbook": {
+        const result = await env.DB.prepare(
+          `SELECT id, name, message, created_at
+           FROM guestbook_entries
+           ORDER BY created_at DESC`
+        ).all();
+        return new Response(JSON.stringify(result.results), {
+          headers: {
+            "Content-Type": "application/json"
+          }
         });
       }
       default: {
@@ -176,6 +200,74 @@ var onRequestPost = /* @__PURE__ */ __name2(async (context) => {
           headers: { "Content-Type": "application/json" }
         });
       }
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { "Content-Type": "application/json" }
+      });
+    } catch (error) {
+      console.log(error);
+      return new Response(
+        JSON.stringify({ error: "Failed to process request" }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+  }
+  if (path === "guestbook") {
+    const clientIP = context.request.headers.get("CF-Connecting-IP") || "unknown";
+    if (await isGuestbookRateLimited(clientIP, context.env)) {
+      return new Response(
+        JSON.stringify({
+          error: "Please wait 60 minutes between submissions"
+        }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+    }
+    try {
+      const data = await context.request.json();
+      if (!data.name || !data.message) {
+        return new Response(
+          JSON.stringify({ error: "Name and message are required" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" }
+          }
+        );
+      }
+      if (data.name.length > 100) {
+        return new Response(JSON.stringify({ error: "Name is too long" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+      if (data.message.length > 1e3) {
+        return new Response(JSON.stringify({ error: "Message is too long" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+      const result = await context.env.DB.prepare(
+        `INSERT INTO guestbook_entries (name, message)
+         VALUES (?, ?)`
+      ).bind(data.name, data.message).run();
+      if (result.error) {
+        return new Response(JSON.stringify({ error: result.error }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+      await context.env.BLOG_CONTENT.put(
+        `guestbook_rate_limit:${clientIP}`,
+        Date.now().toString(),
+        { expirationTtl: 1800 }
+        // 30 minutes
+      );
       return new Response(JSON.stringify({ success: true }), {
         headers: { "Content-Type": "application/json" }
       });

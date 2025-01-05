@@ -118,6 +118,25 @@ function calculateReadTime(content: string): string {
   return `${minutes} min`;
 }
 
+// Add to your existing rate limiting functions
+async function isGuestbookRateLimited(
+  ip: string,
+  env: Env & { BLOG_CONTENT: KVNamespace }
+): Promise<boolean> {
+  const key = `guestbook_rate_limit:${ip}`;
+  const lastSubmission = await env.BLOG_CONTENT.get(key);
+
+  if (!lastSubmission) {
+    return false;
+  }
+
+  // Check if 30 minutes have passed since last submission
+  const lastTime = parseInt(lastSubmission);
+  const thirtyMinutesAgo = Date.now() - 60 * 60 * 1000;
+
+  return lastTime > thirtyMinutesAgo;
+}
+
 export const onRequest = async (context: EventContext<Env, any, any>) => {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -162,6 +181,20 @@ export const onRequest = async (context: EventContext<Env, any, any>) => {
 
         return new Response(JSON.stringify(post), {
           headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      case "guestbook": {
+        const result = await env.DB.prepare(
+          `SELECT id, name, message, created_at
+           FROM guestbook_entries
+           ORDER BY created_at DESC`
+        ).all();
+
+        return new Response(JSON.stringify(result.results), {
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
       }
 
@@ -231,6 +264,91 @@ export const onRequestPost = async (context: EventContext<Env, any, any>) => {
           headers: { "Content-Type": "application/json" },
         });
       }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.log(error);
+      return new Response(
+        JSON.stringify({ error: "Failed to process request" }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+  }
+
+  if (path === "guestbook") {
+    const clientIP =
+      context.request.headers.get("CF-Connecting-IP") || "unknown";
+
+    if (await isGuestbookRateLimited(clientIP, context.env)) {
+      return new Response(
+        JSON.stringify({
+          error: "Please wait 60 minutes between submissions",
+        }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    try {
+      const data = (await context.request.json()) as {
+        name: string;
+        message: string;
+      };
+
+      if (!data.name || !data.message) {
+        return new Response(
+          JSON.stringify({ error: "Name and message are required" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      // Basic input validation
+      if (data.name.length > 100) {
+        return new Response(JSON.stringify({ error: "Name is too long" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      if (data.message.length > 1000) {
+        return new Response(JSON.stringify({ error: "Message is too long" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      const result = await context.env.DB.prepare(
+        `INSERT INTO guestbook_entries (name, message)
+         VALUES (?, ?)`
+      )
+        .bind(data.name, data.message)
+        .run();
+
+      if (result.error) {
+        return new Response(JSON.stringify({ error: result.error }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      // If submission successful, update the rate limit
+      await context.env.BLOG_CONTENT.put(
+        `guestbook_rate_limit:${clientIP}`,
+        Date.now().toString(),
+        { expirationTtl: 1800 } // 30 minutes
+      );
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { "Content-Type": "application/json" },

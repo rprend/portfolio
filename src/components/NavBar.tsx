@@ -61,6 +61,9 @@ const Navbar: Component<NavbarProps> = (props) => {
           <A href="/blog" class={getLinkClass("/blog")}>
             blog
           </A>
+          <A href="/guestbook" class={getLinkClass("/guestbook")}>
+            guestbook
+          </A>
           <A href="/contact" class={getLinkClass("/contact")}>
             contact
           </A>
@@ -86,6 +89,13 @@ const Navbar: Component<NavbarProps> = (props) => {
               onClick={() => setIsMenuOpen(false)}
             >
               blog
+            </A>
+            <A
+              href="/guestbook"
+              class={getLinkClass("/guestbook")}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              guestbook
             </A>
             <A
               href="/contact"
