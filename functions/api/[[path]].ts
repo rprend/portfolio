@@ -92,7 +92,6 @@ async function authenticateRequest(
   const credentials = atob(base64Credentials);
   const [username, password] = credentials.split(":");
 
-  console.log("comparing", password, env.BLOG_PASSWORD);
   console.log(password === env.BLOG_PASSWORD);
   return password === env.BLOG_PASSWORD;
 }
@@ -237,6 +236,7 @@ export const onRequestPost = async (context: EventContext<Env, any, any>) => {
         headers: { "Content-Type": "application/json" },
       });
     } catch (error) {
+      console.log(error);
       return new Response(
         JSON.stringify({ error: "Failed to process request" }),
         {
