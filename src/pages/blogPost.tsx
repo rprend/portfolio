@@ -1,23 +1,89 @@
-import { Component } from "solid-js";
+import { createResource, Show } from "solid-js";
+import { useParams } from "@solidjs/router";
 import Navbar from "../components/NavBar";
-import postsMetadata from "../utils/postsMetadata";
+import { marked } from "marked";
 
-export interface BlogPostProps {
-  blogComponent: Component;
-  name: string;
+interface Post {
+  slug: string;
+  title: string;
+  content: string;
+  date: string;
+  readTime: string;
 }
 
-export function blogPost(props: BlogPostProps) {
-  const BlogComponent = props.blogComponent;
+interface PostData {
+  post: Post;
+  parsedContent: string;
+}
 
-  document.title = `${postsMetadata[props.name]?.title} | Ryan Prendergast`;
+// Update the blog styles to handle text wrapping better
+const blogStyles = `
+  .prose img.not-prose {
+    margin: 0 !important;
+  }
+  .prose div.not-prose {
+    margin: 0 !important;
+  }
+  .prose p {
+    clear: none !important;
+  }
+  .prose > * {
+    clear: none !important;
+  }
+`;
+
+export default function BlogPost() {
+  const params = useParams();
+
+  const [data] = createResource<PostData | null>(async () => {
+    // Sample post for testing
+
+    const response = await fetch(`/api/post?slug=${params.slug}`);
+    const data = await response.json();
+
+    if (!data || !data.content) {
+      return null;
+    }
+
+    const parsedContent = await marked(data.content);
+    return { post: data, parsedContent };
+  });
+
   return (
-    <div class="container mx-auto max-w-2xl px-4 mt-6">
-      <Navbar showBackButton={true} />
-      <BlogComponent />
-      <footer class="text-gray-500 text-sm mt-8 mb-8">
-        Published {postsMetadata[props.name]?.date} by Ryan Prendergast
-      </footer>
+    <div class="min-h-screen bg-background font-body">
+      <style>{blogStyles}</style>
+      <Navbar currentPage="/blog" />
+
+      <Show
+        when={data()}
+        fallback={
+          <div class="p-8 text-center">
+            <h1 class="text-2xl text-primary font-headline font-semibold mb-4">
+              {data.error
+                ? "Error Loading Post"
+                : data() === null
+                  ? "Post Not Found"
+                  : "Loading..."}
+            </h1>
+            {data() === null && (
+              <p class="text-primary">
+                The blog post you're looking for doesn't exist.
+              </p>
+            )}
+          </div>
+        }
+      >
+        {/* Content */}
+        <div class="px-8 py-12 max-w-4xl mx-auto">
+          <h1 class="text-4xl text-primary mb-8 font-headline font-semibold">
+            {data()?.post.title}
+          </h1>
+          <div
+            class="prose prose-lg prose-primary"
+            innerHTML={data()?.parsedContent}
+          />
+        </div>
+      </Show>
     </div>
   );
 }

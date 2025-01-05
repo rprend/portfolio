@@ -1,100 +1,128 @@
-import { createMemo, createSignal, For, JSX } from "solid-js";
-import postsMetadata from "../utils/postsMetadata";
+import { createResource, For, createSignal } from "solid-js";
 
-type sortMethod =
-  | "dateDescending"
-  | "dateAscending"
-  | "nameDescending"
-  | "nameAscending";
+interface Post {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  readTime: string;
+}
 
-const sortMethods: Record<sortMethod, (a: string, b: string) => number> = {
-  dateDescending: (a: string, b: string) => {
-    return (
-      new Date(postsMetadata[b].date).getTime() -
-      new Date(postsMetadata[a].date).getTime()
-    );
-  },
-  dateAscending: (a: string, b: string) => {
-    return (
-      new Date(postsMetadata[a].date).getTime() -
-      new Date(postsMetadata[b].date).getTime()
-    );
-  },
-  nameDescending: (a: string, b: string) => {
-    return postsMetadata[a].title.localeCompare(postsMetadata[b].title);
-  },
-  nameAscending: (a: string, b: string) => {
-    return postsMetadata[b].title.localeCompare(postsMetadata[a].title);
-  },
-};
+type SortField = "title" | "date";
+type SortDirection = "asc" | "desc";
 
-export default function BlogList(): JSX.Element {
-  const [sortMethod, setSortMethod] =
-    createSignal<keyof typeof sortMethods>("dateDescending");
+export default function BlogList() {
+  const [sortField, setSortField] = createSignal<SortField>("date");
+  const [sortDirection, setSortDirection] = createSignal<SortDirection>("desc");
 
-  const sortedPosts = createMemo(() => {
-    return Object.keys(postsMetadata).sort(sortMethods[sortMethod()]);
+  const [posts] = createResource<Post[]>(async () => {
+    try {
+      const response = await fetch("/api/posts");
+
+      const text = await response.text();
+
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        console.error("JSON parse error:", e);
+        throw new Error("Invalid JSON response");
+      }
+    } catch (e) {
+      console.error("Fetch error:", e);
+      throw e;
+    }
   });
 
-  function resortPosts(type: "date" | "name") {
-    setSortMethod((current: sortMethod): sortMethod => {
-      if (current.startsWith(type)) {
-        return current.endsWith("Descending")
-          ? `${type}Ascending`
-          : `${type}Descending`;
-      } else {
-        return `${type}Descending`;
-      }
+  const sortedPosts = () => {
+    const field = sortField();
+    const direction = sortDirection();
+    const items = posts() || [];
+
+    return [...items].sort((a, b) => {
+      const aValue = field === "date" ? new Date(a[field]).getTime() : a[field];
+      const bValue = field === "date" ? new Date(b[field]).getTime() : b[field];
+
+      if (aValue < bValue) return direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return direction === "asc" ? 1 : -1;
+      return 0;
     });
-  }
+  };
+
+  const toggleSort = (field: SortField) => {
+    if (sortField() === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection(field === "title" ? "desc" : "asc");
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField() !== field) return "";
+    if (field === "title") {
+      return sortDirection() === "asc" ? "↓" : "↑";
+    }
+    return sortDirection() === "asc" ? "↑" : "↓";
+  };
 
   return (
-    <div>
-      <div class="prose flex flex-row justify-between h-8 mb-4">
-        <h3>
-          <button
-            class="hover:underline"
-            type="button"
-            onclick={() => resortPosts("name")}
-          >
-            Post
-            {sortMethod() === "nameDescending"
-              ? " ↓"
-              : sortMethod() === "nameAscending"
-                ? " ↑"
-                : ""}
-          </button>
-        </h3>
-        <h3>
-          <button
-            class="hover:underline"
-            type="button"
-            onclick={() => resortPosts("date")}
-          >
-            Date
-            {sortMethod() === "dateDescending"
-              ? " ↓"
-              : sortMethod() === "dateAscending"
-                ? " ↑"
-                : ""}
-          </button>
-        </h3>
+    <div class="border-t border-primary">
+      {/* Header Row */}
+      <div class="h-12 border-b border-primary grid grid-cols-[1fr_170px] items-stretch">
+        <button
+          onClick={() => toggleSort("title")}
+          class="text-sm text-primary font-medium px-8 flex items-center justify-between border-r border-primary hover:bg-primary/5"
+        >
+          <span>WRITINGS</span>
+          <span class="opacity-50 group-hover:opacity-100">
+            {getSortIcon("title")}
+          </span>
+        </button>
+        <button
+          onClick={() => toggleSort("date")}
+          class="text-sm text-primary font-medium px-8 flex items-center justify-between hover:bg-primary/5"
+        >
+          <span>DATE</span>
+          <span class="opacity-50 group-hover:opacity-100">
+            {getSortIcon("date")}
+          </span>
+        </button>
       </div>
-      <For each={sortedPosts()}>
-        {(postID) => (
-          <div class="not-prose flex flex-row justify-between h-8">
-            <p>
-              <a
-                class="hover:underline"
-                href={`/blog/${postsMetadata[postID].slug}`}
-              >
-                {postsMetadata[postID].title}
-              </a>
-            </p>
-            <p>{postsMetadata[postID].date}</p>
-          </div>
-        )}
-      </For>
+
+      {/* Posts List */}
+      <div>
+        <For each={sortedPosts()}>
+          {(post) => (
+            <a
+              href={`/blog/${post.slug}`}
+              class="group border-b border-primary block hover:cursor-pointer"
+            >
+              <div class="grid grid-cols-[1fr_170px] items-stretch relative">
+                {/* Hover effect background */}
+                <div class="absolute inset-0 bg-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                {/* Content */}
+                <div class="relative px-8 py-4 flex items-center gap-2 border-r border-primary">
+                  <span class="text-xl text-primary transition-opacity">
+                    {post.title}
+                  </span>
+                  <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    →
+                  </span>
+                </div>
+                <div class="relative px-8 py-4 text-primary/80 text-right flex items-center justify-end">
+                  {new Date(post.date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    timeZone: "UTC",
+                  })}
+                </div>
+              </div>
+            </a>
+          )}
+        </For>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,12 @@
+name = "blog"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio-blog"
+database_id = "c8d26c5f-6c73-4886-87c7-2cc78afef0b0"
+
+[[kv_namespaces]]
+binding = "BLOG_CONTENT"
+id = "98e93f4c5c62413cbf75b0d7eda508ed"

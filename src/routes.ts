@@ -3,8 +3,11 @@ import type { RouteDefinition } from "@solidjs/router";
 import { blogRoutes } from "./utils/blogRoutes";
 
 import Home from "./pages/home";
-import { Contact } from "./pages/contact";
 import Blog from "./pages/blog";
+import Contact from "./pages/contact";
+import BlogPost from "./pages/blogPost";
+import BlogSubmit from "./pages/blogSubmit";
+import BlogDelete from "./pages/blogDelete";
 
 export const routes: RouteDefinition[] = [
   {
@@ -19,7 +22,18 @@ export const routes: RouteDefinition[] = [
     path: "/blog",
     component: Blog,
   },
-  ...blogRoutes,
+  {
+    path: "/blog/:slug",
+    component: BlogPost,
+  },
+  {
+    path: "/blog/submit",
+    component: BlogSubmit,
+  },
+  {
+    path: "/blog/delete",
+    component: BlogDelete,
+  },
   {
     path: "**",
     component: lazy(() => import("./errors/404")),

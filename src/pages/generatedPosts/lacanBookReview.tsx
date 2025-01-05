@@ -24,7 +24,7 @@ export default function lacanBookReview() {
         <p>
           Psychoanalysis offers a striking answer for why desire is alienating,
           and it does so while avoiding much of the floofiness of Woo. The
-          answer: it&#39;s built into{" "}
+          answer: it&#39;s built into{' '}
           <strong>the way that humans become conscious</strong>. It&#39;s
           structural and inherent like a magnet&#39;s attraction to the opposing
           pole. Desire is alienating because it is the desire of &quot;The
@@ -33,13 +33,13 @@ export default function lacanBookReview() {
         <p>
           Jacques Lacan (1901-1981) was a psychoanalyst, a disciple of Sigmund
           Freud. He built upon the Freudian theories of psychosexual development
-          and unconscious desires, expanding them into a narrative of{" "}
+          and unconscious desires, expanding them into a narrative of{' '}
           <strong>why</strong> and <strong>how</strong> humans desire. Like
           other narrative simplifications of complicated systems, I&#39;m not
-          sure how literally true Lacan&#39;s ideas are, if at all. But as a{" "}
+          sure how literally true Lacan&#39;s ideas are, if at all. But as a{' '}
           <a href="https://slatestarcodex.com/2019/01/08/book-review-the-structure-of-scientific-revolutions/">
             framework
-          </a>{" "}
+          </a>{' '}
           for understanding the contradictions of human psychology, I&#39;m
           blown away.
         </p>
@@ -139,7 +139,7 @@ export default function lacanBookReview() {
           symbol for the rules and laws mother must abide by.
         </p>
         <p>
-          The acceptance of the paternal metaphor introduces the first{" "}
+          The acceptance of the paternal metaphor introduces the first{' '}
           <strong>symbol</strong>, a term Lacan borrows from Saussarian
           Linguistics, meaning &quot;phrase-image&quot;. The distinction between
           signal and signified is commonly explained as &quot;the map is not the
@@ -234,7 +234,7 @@ export default function lacanBookReview() {
           and cure France&#39;s craziest patients. His practice would appear to
           those familiar with &quot;Therapy&quot; (CBT) weird, bizarre, and
           unscientific, with a mostly silent Lacan interjecting with puns or
-          nonsense phrases, and sessions ending seemingly randomly. Take{" "}
+          nonsense phrases, and sessions ending seemingly randomly. Take{' '}
           <a href="https://www.youtube.com/watch?v=VA-SXCGwLvY">this clip</a> of
           a former patient of his, recalling how he interjected her session with
           a pun on Gestapo and &quot;geste à peau&quot; (gesture), and that
@@ -295,7 +295,7 @@ export default function lacanBookReview() {
             their process.
           </li>
           <li>
-            Whoever synthesizes the Lacanian unconscious with{" "}
+            Whoever synthesizes the Lacanian unconscious with{' '}
             <strong>considerations</strong> in &quot;The Nature and Origins of
             Mass Opinion&quot; deserves a Nobel prize.
           </li>
@@ -314,5 +314,5 @@ export default function lacanBookReview() {
         </ul>
       </article>
     </div>
-  );
+  )
 }
