@@ -17,7 +17,7 @@ const Navbar: Component<NavbarProps> = (props) => {
   };
 
   return (
-    <header class="px-8 py-4 border-b border-primary">
+    <header class="px-8 py-4 border-b border-primary relative z-50">
       <nav class="flex items-center justify-between">
         {/* Mobile menu button - moved to left */}
         <button
@@ -71,7 +71,7 @@ const Navbar: Component<NavbarProps> = (props) => {
 
         {/* Mobile menu dropdown */}
         <div
-          class={`absolute top-16 left-0 right-0 bg-background border-b border-primary md:hidden ${
+          class={`absolute top-16 left-0 right-0 bg-background border-b border-primary md:hidden z-50 ${
             isMenuOpen() ? "block" : "hidden"
           }`}
         >

@@ -69,13 +69,13 @@ const Guestbook: Component = () => {
           }}
         ></div>
 
-        <div class="w-full px-6 py-6 relative z-10 flex justify-between items-center">
+        <div class="w-full px-6 py-6 relative z-10 flex flex-col md:flex-row md:items-center gap-4 md:gap-8 md:justify-between">
           <h1 class="text-headline-mobile md:text-headline font-semibold text-primary leading-tight tracking-wide font-afacad">
             GUESTBOOK
           </h1>
           <button
             onClick={() => setShowForm(true)}
-            class="px-4 py-2 bg-primary text-background hover:opacity-80 transition-opacity"
+            class="self-start px-4 py-2 bg-primary text-background hover:opacity-80 transition-opacity whitespace-nowrap"
           >
             Sign Guestbook
           </button>
@@ -85,7 +85,7 @@ const Guestbook: Component = () => {
       <div class="border-t border-primary">
         {/* Header Row */}
         <div class="h-12 border-b border-primary grid grid-cols-[1fr_170px] items-stretch">
-          <div class="text-sm text-primary font-medium px-8 flex items-center justify-between border-r border-primary">
+          <div class="text-sm text-primary font-medium px-8 flex items-center justify-between md:border-r border-primary">
             <span>MESSAGES</span>
           </div>
           <div class="text-sm text-primary font-medium px-8 flex items-center justify-between">
@@ -101,16 +101,16 @@ const Guestbook: Component = () => {
           <For each={entries()}>
             {(entry) => (
               <div class="border-b border-primary">
-                <div class="grid grid-cols-[1fr_170px] items-stretch relative">
-                  <div class="relative px-8 py-4 flex flex-col gap-2 border-r border-primary">
-                    <span class="text-xl text-primary font-bold">
+                <div class="grid grid-cols-[1fr_170px] md:items-stretch relative">
+                  <div class="relative px-8 py-4 flex flex-col gap-2 md:border-r border-primary min-w-0">
+                    <span class="text-xl text-primary font-bold break-words">
                       {entry.name}
                     </span>
-                    <span class="text-primary whitespace-pre-wrap">
+                    <span class="text-primary whitespace-pre-wrap break-words">
                       {entry.message}
                     </span>
                   </div>
-                  <div class="relative px-8 py-4 text-primary/80 text-right flex items-center justify-end">
+                  <div class="relative px-8 py-4 text-primary/80 text-right flex items-center justify-end shrink-0">
                     {new Date(entry.created_at).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",

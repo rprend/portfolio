@@ -97,20 +97,20 @@ export default function BlogList() {
               href={`/blog/${post.slug}`}
               class="group border-b border-primary block hover:cursor-pointer"
             >
-              <div class="grid grid-cols-[1fr_170px] items-stretch relative">
+              <div class="grid grid-cols-[1fr_170px] md:items-stretch relative">
                 {/* Hover effect background */}
                 <div class="absolute inset-0 bg-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
                 {/* Content */}
-                <div class="relative px-8 py-4 flex items-center gap-2 border-r border-primary">
-                  <span class="text-xl text-primary transition-opacity">
+                <div class="relative px-8 py-4 flex items-center gap-2 md:border-r border-primary min-w-0">
+                  <span class="text-xl text-primary transition-opacity break-words">
                     {post.title}
                   </span>
-                  <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                     →
                   </span>
                 </div>
-                <div class="relative px-8 py-4 text-primary/80 text-right flex items-center justify-end">
+                <div class="relative px-8 py-4 text-primary/80 text-right flex items-center justify-end shrink-0">
                   {new Date(post.date).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
