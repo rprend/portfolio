@@ -5,8 +5,8 @@ import background from "../assets/background.png";
 import GenArt2 from "../assets/GenArt2.png";
 import GenArt4 from "../assets/GenArt4.png";
 import Site from "../assets/site.png";
-import Grinn from "../assets/grinn.png";
-import Calvino from "../assets/calvino.png";
+import Grinn from "../assets/Grinn.png";
+import Calvino from "../assets/Calvino.png";
 
 export default function Home() {
   return (
