@@ -29,9 +29,38 @@ export default function BlogSubmit() {
     "left" | "center" | "right"
   >("center");
   const [imageCaption, setImageCaption] = createSignal("");
+  const [previewUrl, setPreviewUrl] = createSignal("");
   let ref!: HTMLDivElement;
   let toolbarRef!: HTMLDivElement;
   let linkInputRef!: HTMLInputElement;
+
+  // Add array of available images
+  const availableImages = [
+    { name: "Logo", path: "/src/assets/logo.webp" },
+    { name: "Work Example 1", path: "/src/assets/1mbwork1.png" },
+    { name: "Work Example 2", path: "/src/assets/1mbwork2.png" },
+    { name: "Calvino", path: "/src/assets/Calvino.png" },
+    { name: "Grinn", path: "/src/assets/Grinn.png" },
+    { name: "Site", path: "/src/assets/site.png" },
+    { name: "Generated Art 2", path: "/src/assets/GenArt2.png" },
+    { name: "Generated Art 4", path: "/src/assets/GenArt4.png" },
+    { name: "Background", path: "/src/assets/background.png" },
+    { name: "Background Tiles", path: "/src/assets/backgroundtiles.webp" },
+    { name: "1MB", path: "/src/assets/1mb.png" },
+    { name: "Webmapper", path: "/src/assets/Webmapper.png" },
+  ];
+
+  // Add function to handle image selection from dropdown
+  const handleImageSelect = (path: string) => {
+    setImageUrl(path);
+    setPreviewUrl(path);
+  };
+
+  // Add function to handle URL input
+  const handleUrlInput = (url: string) => {
+    setImageUrl(url);
+    setPreviewUrl(url);
+  };
 
   const editor = createTiptapEditor(() => ({
     element: ref!,
@@ -509,15 +538,62 @@ export default function BlogSubmit() {
               </h2>
 
               <div>
-                <label class="block text-primary mb-2">Image URL</label>
+                <label class="block text-primary mb-2">Select Image</label>
+                <div class="grid grid-cols-3 gap-4 mb-4 max-h-64 overflow-y-auto p-2 bg-background-light border border-primary rounded">
+                  {availableImages.map((img) => (
+                    <button
+                      type="button"
+                      onClick={() => handleImageSelect(img.path)}
+                      class={`relative group p-2 rounded hover:bg-primary/10 transition-colors ${
+                        imageUrl() === img.path
+                          ? "bg-primary/20 ring-2 ring-primary"
+                          : ""
+                      }`}
+                    >
+                      <img
+                        src={img.path}
+                        alt={img.name}
+                        class="w-full aspect-square object-cover rounded"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100%" height="100%" fill="%23eee"/><text x="50%" y="50%" font-family="Arial" font-size="14" fill="%23999" text-anchor="middle" dy=".3em">Error</text></svg>';
+                        }}
+                      />
+                      <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded">
+                        <span class="text-white text-sm text-center px-2">
+                          {img.name}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <label class="block text-primary mb-2">
+                  Or Enter Image URL
+                </label>
                 <input
                   type="text"
                   value={imageUrl()}
-                  onInput={(e) => setImageUrl(e.currentTarget.value)}
+                  onInput={(e) => handleUrlInput(e.currentTarget.value)}
                   class="w-full p-2 bg-background-light border border-primary text-primary rounded"
-                  required
                   placeholder="Enter image URL"
                 />
+
+                <Show when={previewUrl()}>
+                  <div class="mt-4">
+                    <label class="block text-primary mb-2">
+                      Selected Image Preview
+                    </label>
+                    <div class="border border-primary rounded p-2 flex items-center justify-center bg-background-light">
+                      <img
+                        src={previewUrl()}
+                        alt="Preview"
+                        class="max-h-48 object-contain"
+                        onError={() => setPreviewUrl("")}
+                      />
+                    </div>
+                  </div>
+                </Show>
               </div>
 
               <div>
