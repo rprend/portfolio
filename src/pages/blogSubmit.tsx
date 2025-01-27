@@ -89,6 +89,8 @@ export default function BlogSubmit() {
       const { url } = await response.json();
       handleImageSelect(url);
       setUploadStatus("idle");
+      // Refresh the images list
+      refetch();
 
       // Clear the input so the same file can be uploaded again if needed
       input.value = "";
@@ -598,7 +600,38 @@ export default function BlogSubmit() {
               </h2>
 
               <div>
-                <label class="block text-primary mb-2">Select Image</label>
+                <div class="flex justify-between items-center mb-2">
+                  <label class="block text-primary">Select Image</label>
+                  <div class="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      class="hidden"
+                      id="image-upload"
+                    />
+                    <label
+                      for="image-upload"
+                      class={`flex items-center justify-center w-8 h-8 rounded-full border-2 border-primary cursor-pointer hover:bg-primary/10 transition-colors ${
+                        uploadStatus() === "uploading"
+                          ? "bg-primary/20 cursor-wait"
+                          : ""
+                      } ${
+                        uploadStatus() === "error"
+                          ? "bg-red-100 border-red-500"
+                          : ""
+                      }`}
+                    >
+                      {uploadStatus() === "uploading" ? (
+                        <span class="animate-spin">↻</span>
+                      ) : uploadStatus() === "error" ? (
+                        <span class="text-red-500">!</span>
+                      ) : (
+                        <span class="text-xl leading-none">+</span>
+                      )}
+                    </label>
+                  </div>
+                </div>
                 <div class="grid grid-cols-3 gap-4 mb-4 max-h-64 overflow-y-auto p-2 bg-background-light border border-primary rounded">
                   <Show
                     when={!images.loading}
@@ -608,91 +641,73 @@ export default function BlogSubmit() {
                       </div>
                     }
                   >
-                    {images()?.map((img) => (
-                      <div
-                        class={`relative group p-2 rounded hover:bg-primary/10 transition-colors ${
-                          imageUrl() === img.url
-                            ? "bg-primary/20 ring-2 ring-primary"
-                            : ""
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => handleImageSelect(img.url)}
-                          class="w-full"
+                    <Show
+                      when={images()?.length > 0}
+                      fallback={
+                        <div class="col-span-3 flex flex-col items-center justify-center gap-4 py-8 text-primary/60">
+                          <span class="text-4xl">📷</span>
+                          <p class="text-center">No images uploaded yet</p>
+                          <label
+                            for="image-upload"
+                            class="px-4 py-2 border-2 border-primary rounded cursor-pointer hover:bg-primary/10 transition-colors"
+                          >
+                            Upload your first image
+                          </label>
+                        </div>
+                      }
+                    >
+                      {images()?.map((img) => (
+                        <div
+                          class={`relative group p-2 rounded hover:bg-primary/10 transition-colors ${
+                            imageUrl() === img.url
+                              ? "bg-primary/20 ring-2 ring-primary"
+                              : ""
+                          }`}
                         >
-                          <img
-                            src={img.url}
-                            alt={img.name}
-                            class="w-full aspect-square object-cover rounded"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src =
-                                'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100%" height="100%" fill="%23eee"/><text x="50%" y="50%" font-family="Arial" font-size="14" fill="%23999" text-anchor="middle" dy=".3em">Error</text></svg>';
-                            }}
-                          />
-                          <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded">
-                            <span class="text-white text-sm text-center px-2">
-                              {img.name}
-                            </span>
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleImageDelete(img.id)}
-                          class="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
+                          <button
+                            type="button"
+                            onClick={() => handleImageSelect(img.url)}
+                            class="w-full"
+                          >
+                            <img
+                              src={img.url}
+                              alt={img.name}
+                              class="w-full aspect-square object-cover rounded"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100%" height="100%" fill="%23eee"/><text x="50%" y="50%" font-family="Arial" font-size="14" fill="%23999" text-anchor="middle" dy=".3em">Error</text></svg>';
+                              }}
+                            />
+                            <div class="mt-1 px-1">
+                              <p class="text-xs text-primary line-clamp-2 text-left">
+                                {img.name}
+                              </p>
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleImageDelete(img.id)}
+                            class="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </Show>
                   </Show>
                 </div>
 
-                <div class="flex flex-col gap-4 mb-4">
-                  <div>
-                    <label class="block text-primary mb-2">
-                      Upload New Image
-                    </label>
-                    <div class="relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        class="hidden"
-                        id="image-upload"
-                      />
-                      <label
-                        for="image-upload"
-                        class={`w-full flex items-center justify-center px-4 py-2 border border-primary rounded cursor-pointer
-                          ${uploadStatus() === "uploading" ? "bg-primary/20 cursor-wait" : "hover:bg-primary/10"}
-                          ${uploadStatus() === "error" ? "bg-red-100 border-red-500" : ""}
-                        `}
-                      >
-                        {uploadStatus() === "uploading" ? (
-                          <span>Uploading...</span>
-                        ) : uploadStatus() === "error" ? (
-                          <span class="text-red-500">
-                            Upload failed. Try again.
-                          </span>
-                        ) : (
-                          <span>Click to upload image</span>
-                        )}
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label class="block text-primary mb-2">
-                      Or Enter Image URL
-                    </label>
-                    <input
-                      type="text"
-                      value={imageUrl()}
-                      onInput={(e) => handleUrlInput(e.currentTarget.value)}
-                      class="w-full p-2 bg-background-light border border-primary text-primary rounded"
-                      placeholder="Enter image URL"
-                    />
-                  </div>
+                <div>
+                  <label class="block text-primary mb-2">
+                    Or Enter Image URL
+                  </label>
+                  <input
+                    type="text"
+                    value={imageUrl()}
+                    onInput={(e) => handleUrlInput(e.currentTarget.value)}
+                    class="w-full p-2 bg-background-light border border-primary text-primary rounded"
+                    placeholder="Enter image URL"
+                  />
                 </div>
               </div>
 
