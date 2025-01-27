@@ -44,13 +44,15 @@ export default function BlogSubmit() {
       throw new Error("Failed to fetch images");
     }
     const data = (await response.json()) as {
-      results: Array<{ name: string; url: string }>;
+      results: Array<{ id: string; name: string; url: string }>;
     };
     return data.results;
   };
 
-  const [images] =
-    createResource<Array<{ name: string; url: string }>>(fetchImages);
+  const [images, { refetch }] =
+    createResource<Array<{ id: string; name: string; url: string }>>(
+      fetchImages
+    );
 
   // Add function to handle image selection from dropdown
   const handleImageSelect = (url: string) => {
@@ -429,6 +431,29 @@ export default function BlogSubmit() {
     setImageCaption("");
   };
 
+  // Add function to handle image deletion
+  const handleImageDelete = async (id: string) => {
+    try {
+      const response = await fetch("/api/image", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      // Refresh the images list
+      refetch();
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
+
   return (
     <div class="min-h-screen bg-background font-body">
       <Navbar currentPage="/blog" />
@@ -584,30 +609,41 @@ export default function BlogSubmit() {
                     }
                   >
                     {images()?.map((img) => (
-                      <button
-                        type="button"
-                        onClick={() => handleImageSelect(img.url)}
+                      <div
                         class={`relative group p-2 rounded hover:bg-primary/10 transition-colors ${
                           imageUrl() === img.url
                             ? "bg-primary/20 ring-2 ring-primary"
                             : ""
                         }`}
                       >
-                        <img
-                          src={img.url}
-                          alt={img.name}
-                          class="w-full aspect-square object-cover rounded"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src =
-                              'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100%" height="100%" fill="%23eee"/><text x="50%" y="50%" font-family="Arial" font-size="14" fill="%23999" text-anchor="middle" dy=".3em">Error</text></svg>';
-                          }}
-                        />
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded">
-                          <span class="text-white text-sm text-center px-2">
-                            {img.name}
-                          </span>
-                        </div>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => handleImageSelect(img.url)}
+                          class="w-full"
+                        >
+                          <img
+                            src={img.url}
+                            alt={img.name}
+                            class="w-full aspect-square object-cover rounded"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src =
+                                'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100%" height="100%" fill="%23eee"/><text x="50%" y="50%" font-family="Arial" font-size="14" fill="%23999" text-anchor="middle" dy=".3em">Error</text></svg>';
+                            }}
+                          />
+                          <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded">
+                            <span class="text-white text-sm text-center px-2">
+                              {img.name}
+                            </span>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleImageDelete(img.id)}
+                          class="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
+                        >
+                          ×
+                        </button>
+                      </div>
                     ))}
                   </Show>
                 </div>
@@ -658,22 +694,6 @@ export default function BlogSubmit() {
                     />
                   </div>
                 </div>
-
-                <Show when={previewUrl()}>
-                  <div class="mt-4">
-                    <label class="block text-primary mb-2">
-                      Selected Image Preview
-                    </label>
-                    <div class="border border-primary rounded p-2 flex items-center justify-center bg-background-light">
-                      <img
-                        src={previewUrl()}
-                        alt="Preview"
-                        class="max-h-48 object-contain"
-                        onError={() => setPreviewUrl("")}
-                      />
-                    </div>
-                  </div>
-                </Show>
               </div>
 
               <div>

@@ -480,6 +480,44 @@ export const onRequestDelete = async (context: EventContext<Env, any, any>) => {
     }
   }
 
+  if (path === "image") {
+    // Check authentication first
+    const request = context.request as unknown as Request;
+    if (!(await authenticateRequest(request, context.env))) {
+      return createAuthChallengeResponse();
+    }
+
+    try {
+      const { id } = (await context.request.json()) as { id: string };
+
+      // Delete from metadata table
+      const result = await context.env.DB.prepare(
+        `DELETE FROM images WHERE id = ?`
+      )
+        .bind(id)
+        .run();
+
+      if (result.error) {
+        return new Response(JSON.stringify({ error: result.error }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      return new Response(
+        JSON.stringify({ error: "Failed to process request" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+  }
+
   return new Response(JSON.stringify({ error: "Invalid endpoint" }), {
     status: 404,
     headers: { "Content-Type": "application/json" },
