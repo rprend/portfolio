@@ -260,17 +260,11 @@ export const onRequestPost = async (context: EventContext<Env, any, any>) => {
       // Convert file to ArrayBuffer for R2
       const arrayBuffer = await file.arrayBuffer();
 
-      // List before upload
-      const beforeList = await context.env.BUCKET.list();
-
-      const uploadResult = await context.env.BUCKET.put(fileName, arrayBuffer, {
+      await context.env.BUCKET.put(fileName, arrayBuffer, {
         httpMetadata: {
           contentType: file.type,
         },
       });
-
-      // List after upload to verify
-      const afterList = await context.env.BUCKET.list();
 
       // Try to get the file directly
       const obj = await context.env.BUCKET.get(fileName);
