@@ -10,3 +10,11 @@ database_id = "c8d26c5f-6c73-4886-87c7-2cc78afef0b0"
 [[kv_namespaces]]
 binding = "BLOG_CONTENT"
 id = "98e93f4c5c62413cbf75b0d7eda508ed"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "prendergast-images"
+preview_bucket_name = "prendergast-images"
+
+[vars]
+ASSETS_URL = "https://images.prendergast.dev"

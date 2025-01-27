@@ -3,12 +3,15 @@ import {
   EventContext,
   KVNamespace,
   PagesFunction,
+  R2Bucket,
 } from "@cloudflare/workers-types";
 
 interface Env {
   DB: D1Database;
   BLOG_CONTENT: KVNamespace;
   BLOG_PASSWORD: string;
+  BUCKET: R2Bucket;
+  ASSETS_URL: string;
 }
 
 async function incrementAttemptCount(
@@ -92,7 +95,6 @@ async function authenticateRequest(
   const credentials = atob(base64Credentials);
   const [username, password] = credentials.split(":");
 
-  console.log(password === env.BLOG_PASSWORD);
   return password === env.BLOG_PASSWORD;
 }
 
@@ -138,93 +140,166 @@ async function isGuestbookRateLimited(
 }
 
 export const onRequest = async (context: EventContext<Env, any, any>) => {
-  const { request, env } = context;
+  const { request } = context;
   const url = new URL(request.url);
   const path = url.pathname.replace("/api/", "");
 
-  try {
-    switch (path) {
-      case "posts": {
-        const result = await env.DB.prepare(
-          `SELECT slug, title, excerpt, date, readTime
-           FROM posts
-           ORDER BY date DESC`
-        ).all();
+  switch (path) {
+    case "posts": {
+      const result = await context.env.DB.prepare(
+        `SELECT slug, title, excerpt, date, readTime
+         FROM posts
+         ORDER BY date DESC`
+      ).all();
 
-        return new Response(JSON.stringify(result.results), {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+      return new Response(JSON.stringify(result.results), {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+
+    case "post": {
+      const slug = url.searchParams.get("slug");
+      if (!slug) {
+        throw new Error("Post slug is required");
       }
 
-      case "post": {
-        const slug = url.searchParams.get("slug");
-        if (!slug) {
-          throw new Error("Post slug is required");
-        }
+      const post = await context.env.DB.prepare(
+        `SELECT slug, title, excerpt, date, readTime, content
+         FROM posts
+         WHERE slug = ?`
+      )
+        .bind(slug)
+        .first();
 
-        const post = await env.DB.prepare(
-          `SELECT slug, title, excerpt, date, readTime, content
-           FROM posts
-           WHERE slug = ?`
-        )
-          .bind(slug)
-          .first();
-
-        if (!post) {
-          return new Response(JSON.stringify({ error: "Post not found" }), {
-            status: 404,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
-
-        return new Response(JSON.stringify(post), {
+      if (!post) {
+        return new Response(JSON.stringify({ error: "Post not found" }), {
+          status: 404,
           headers: { "Content-Type": "application/json" },
         });
       }
 
-      case "guestbook": {
-        const result = await env.DB.prepare(
-          `SELECT id, name, message, created_at
-           FROM guestbook_entries
-           ORDER BY created_at DESC`
+      return new Response(JSON.stringify(post), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    case "guestbook": {
+      const result = await context.env.DB.prepare(
+        `SELECT id, name, message, created_at
+         FROM guestbook_entries
+         ORDER BY created_at DESC`
+      ).all();
+
+      return new Response(JSON.stringify(result.results), {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+
+    case "images/list": {
+      if (request.method !== "GET") {
+        return new Response("Method not allowed", { status: 405 });
+      }
+
+      try {
+        const images = await context.env.DB.prepare(
+          "SELECT * FROM images ORDER BY created_at DESC"
         ).all();
 
-        return new Response(JSON.stringify(result.results), {
-          headers: {
-            "Content-Type": "application/json",
-          },
+        return new Response(JSON.stringify(images), {
+          headers: { "Content-Type": "application/json" },
         });
-      }
-
-      default: {
-        return new Response(
-          JSON.stringify({
-            error: "Not Found",
-            availableEndpoints: ["/api/posts", "/api/post?slug=<post_slug>"],
-          }),
-          {
-            status: 404,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
+      } catch (error) {
+        console.error("Error fetching images:", error);
+        return new Response("Failed to fetch images", { status: 500 });
       }
     }
-  } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: "Database query failed",
-        details: error instanceof Error ? error.message : String(error),
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+
+    default: {
+      return new Response(
+        JSON.stringify({
+          error: "Not Found",
+          availableEndpoints: ["/api/posts", "/api/post?slug=<post_slug>"],
+        }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
   }
 };
 
 export const onRequestPost = async (context: EventContext<Env, any, any>) => {
   const url = new URL(context.request.url);
   const path = url.pathname.replace("/api/", "");
+
+  if (path === "images/upload") {
+    const request = context.request as unknown as Request;
+    if (!(await authenticateRequest(request, context.env))) {
+      return createAuthChallengeResponse();
+    }
+
+    try {
+      const formData = await context.request.formData();
+      const file = formData.get("file") as unknown as File;
+
+      if (!file || !file.type || !file.type.startsWith("image/")) {
+        console.error("Invalid file:", { file, type: file?.type });
+        return new Response("No valid image provided", { status: 400 });
+      }
+
+      // Generate a unique filename
+      const extension = file.name.split(".").pop() || "png";
+      const uniqueId = crypto.randomUUID();
+      const fileName = `${uniqueId}.${extension}`;
+
+      // Convert file to ArrayBuffer for R2
+      const arrayBuffer = await file.arrayBuffer();
+
+      // List before upload
+      const beforeList = await context.env.BUCKET.list();
+
+      const uploadResult = await context.env.BUCKET.put(fileName, arrayBuffer, {
+        httpMetadata: {
+          contentType: file.type,
+        },
+      });
+
+      // List after upload to verify
+      const afterList = await context.env.BUCKET.list();
+
+      // Try to get the file directly
+      const obj = await context.env.BUCKET.get(fileName);
+      if (!obj) {
+        console.error("Image verification failed - get request returned null");
+        return new Response("Failed to upload image", { status: 500 });
+      }
+
+      // If we got the object, try to read its contents
+      const objData = await obj.arrayBuffer();
+
+      // Get the public URL
+      const imageUrl = `${context.env.ASSETS_URL}/${fileName}`;
+
+      // Store metadata in D1
+      await context.env.DB.prepare(
+        "INSERT INTO images (id, name, url) VALUES (?, ?, ?)"
+      )
+        .bind(uniqueId, file.name, imageUrl)
+        .run();
+
+      return new Response(JSON.stringify({ url: imageUrl }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+      return new Response("Upload failed", { status: 500 });
+    }
+  }
 
   if (path === "post") {
     // Check authentication first
@@ -269,7 +344,6 @@ export const onRequestPost = async (context: EventContext<Env, any, any>) => {
         headers: { "Content-Type": "application/json" },
       });
     } catch (error) {
-      console.log(error);
       return new Response(
         JSON.stringify({ error: "Failed to process request" }),
         {
