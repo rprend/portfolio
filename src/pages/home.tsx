@@ -46,26 +46,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Diagonal Stripes - Updated colors */}
-      {/* <div class="relative w-full h-40 overflow-hidden bg-gradient-to-b from-background to-background/95">
-        <div
-          class="absolute right-0 top-0 w-72 h-[200%] -rotate-45 flex flex-col mix-blend-multiply"
-          style="transform-origin: right top;"
-        >
-          <div class="h-8 bg-[#9D4EDD]/90 translate-x-12 mix-blend-screen"></div>
-          <div class="h-8 bg-[#7B2CBF]/90 translate-x-8 mix-blend-screen"></div>
-          <div class="h-10 bg-[#5A189A]/90 translate-x-4 mix-blend-overlay"></div>
-          <div class="h-10 bg-[#3C096C]/90 translate-x-0"></div>
-        </div>
-        <div
-          class="absolute right-12 top-0 w-72 h-[200%] -rotate-45 flex flex-col mix-blend-soft-light"
-          style="transform-origin: right top;"
-        >
-          <div class="h-12 bg-[#FF449F]/40 translate-x-8"></div>
-          <div class="h-12 bg-[#9D4EDD]/80 translate-x-4"></div>
-        </div>
-      </div> */}
-
       {/* Project Table/Grid */}
       <div class="border-t border-primary">
         {/* Header Row */}
@@ -96,11 +76,11 @@ export default function Home() {
 
           <div class="border-b md:border-r border-primary">
             <ProjectCard
-              title="grinn"
-              description="Writes a joke in the style of whoever you wish"
+              title="rewriter"
+              description="Joke writer and Italo Calvino style text rewriter"
               date="November 2023"
-              href="https://grinn.vercel.app/"
-              images={[Grinn]}
+              href="/blog/rewriter"
+              images={[Grinn, Calvino]}
             />
           </div>
 
