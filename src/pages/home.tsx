@@ -76,21 +76,11 @@ export default function Home() {
 
           <div class="border-b md:border-r border-primary">
             <ProjectCard
-              title="rewriter"
-              description="Joke writer and Italo Calvino style text rewriter"
+              title="rewriters"
+              description="Joke writer Norm MacDonald style and text rewriter Italo Calvino style"
               date="November 2023"
               href="/blog/rewriter"
               images={[Grinn, Calvino]}
-            />
-          </div>
-
-          <div class="border-b border-primary">
-            <ProjectCard
-              title="calvino editor"
-              description='Rewrites your words into the style of "Invisible Cities" by Italo Calvino'
-              date="November 2023"
-              href="https://stylistic.vercel.app/"
-              images={[Calvino]}
             />
           </div>
 
