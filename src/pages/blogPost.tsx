@@ -26,9 +26,15 @@ const blogStyles = `
   }
   .prose p {
     clear: none !important;
+    line-height: 1.7 !important;
+    margin-top: 1.25em !important;
+    margin-bottom: 1.25em !important;
   }
   .prose > * {
     clear: none !important;
+  }
+  .prose {
+    line-height: 1.7 !important;
   }
 `;
 
@@ -48,6 +54,16 @@ export default function BlogPost() {
     const parsedContent = await marked(data.content);
     return { post: data, parsedContent };
   });
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+  };
 
   return (
     <div class="min-h-screen bg-background font-body">
@@ -82,9 +98,17 @@ export default function BlogPost() {
             </A>
           </div>
 
-          <h1 class="text-4xl text-primary mb-8 font-headline font-semibold">
+          <h1 class="text-4xl text-primary mb-4 font-headline font-semibold">
             {data()?.post.title}
           </h1>
+
+          <div class="flex flex-wrap items-center text-primary/70 mb-8">
+            <div class="mr-4">
+              {data()?.post.date ? formatDate(data()?.post.date) : ""}
+            </div>
+            <div>Ryan Prendergast</div>
+          </div>
+
           <div
             class="prose prose-lg prose-primary"
             innerHTML={data()?.parsedContent}
