@@ -1,4 +1,4 @@
-import { createResource, For, createSignal } from "solid-js";
+import { createResource, For, createSignal, Show } from "solid-js";
 
 interface Post {
   slug: string;
@@ -8,17 +8,19 @@ interface Post {
   readTime: string;
 }
 
-type SortField = "title" | "date";
 type SortDirection = "asc" | "desc";
 
+interface MonthGroup {
+  monthYear: string;
+  posts: Post[];
+}
+
 export default function BlogList() {
-  const [sortField, setSortField] = createSignal<SortField>("date");
   const [sortDirection, setSortDirection] = createSignal<SortDirection>("desc");
 
   const [posts] = createResource<Post[]>(async () => {
     try {
       const response = await fetch("/api/posts");
-
       const text = await response.text();
 
       try {
@@ -34,95 +36,106 @@ export default function BlogList() {
   });
 
   const sortedPosts = () => {
-    const field = sortField();
     const direction = sortDirection();
     const items = posts() || [];
 
     return [...items].sort((a, b) => {
-      const aValue = field === "date" ? new Date(a[field]).getTime() : a[field];
-      const bValue = field === "date" ? new Date(b[field]).getTime() : b[field];
+      const aDate = new Date(a.date).getTime();
+      const bDate = new Date(b.date).getTime();
 
-      if (aValue < bValue) return direction === "asc" ? -1 : 1;
-      if (aValue > bValue) return direction === "asc" ? 1 : -1;
-      return 0;
+      return direction === "asc" ? aDate - bDate : bDate - aDate;
     });
   };
 
-  const toggleSort = (field: SortField) => {
-    if (sortField() === field) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortField(field);
-      setSortDirection(field === "title" ? "desc" : "asc");
-    }
+  const toggleSortDirection = () => {
+    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
-  const getSortIcon = (field: SortField) => {
-    if (sortField() !== field) return "";
-    if (field === "title") {
-      return sortDirection() === "asc" ? "↓" : "↑";
-    }
+  const getSortIcon = () => {
     return sortDirection() === "asc" ? "↑" : "↓";
   };
 
+  const groupedByMonth = () => {
+    const sorted = sortedPosts();
+    const groups: MonthGroup[] = [];
+
+    sorted.forEach((post) => {
+      const date = new Date(post.date);
+      const monthYear = date.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      });
+
+      let group = groups.find((g) => g.monthYear === monthYear);
+      if (!group) {
+        group = { monthYear, posts: [] };
+        groups.push(group);
+      }
+
+      group.posts.push(post);
+    });
+
+    return groups;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+    const day = date.getUTCDate().toString().padStart(2, "0");
+    return `${month}-${day}`;
+  };
+
   return (
-    <div class="border-t border-primary">
-      {/* Header Row */}
-      <div class="h-12 border-b border-primary grid grid-cols-[1fr_170px] items-stretch">
-        <button
-          onClick={() => toggleSort("title")}
-          class="text-sm text-primary font-medium px-8 flex items-center justify-between border-r border-primary hover:bg-primary/5"
-        >
-          <span>WRITINGS</span>
-          <span class="opacity-50 group-hover:opacity-100">
-            {getSortIcon("title")}
-          </span>
-        </button>
-        <button
-          onClick={() => toggleSort("date")}
-          class="text-sm text-primary font-medium px-8 flex items-center justify-between hover:bg-primary/5"
-        >
-          <span>DATE</span>
-          <span class="opacity-50 group-hover:opacity-100">
-            {getSortIcon("date")}
-          </span>
-        </button>
-      </div>
+    <div>
+      {/* Posts List Grouped by Month */}
+      <Show
+        when={!posts.loading}
+        fallback={<div class="p-4">Loading posts...</div>}
+      >
+        <div class="flex justify-end border-y border-primary py-2 px-4">
+          <button
+            onClick={toggleSortDirection}
+            class="text-sm text-primary font-medium flex items-center gap-2 hover:bg-primary/5 px-3 py-1 rounded transition-colors"
+          >
+            <span>Sort by Date</span>
+            <span>{getSortIcon()}</span>
+          </button>
+        </div>
 
-      {/* Posts List */}
-      <div>
-        <For each={sortedPosts()}>
-          {(post) => (
-            <a
-              href={`/blog/${post.slug}`}
-              class="group border-b border-primary block hover:cursor-pointer"
-            >
-              <div class="grid grid-cols-[1fr_170px] md:items-stretch relative">
-                {/* Hover effect background */}
-                <div class="absolute inset-0 bg-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-                {/* Content */}
-                <div class="relative px-8 py-4 flex items-center gap-2 md:border-r border-primary min-w-0">
-                  <span class="text-xl text-primary transition-opacity break-words">
-                    {post.title}
-                  </span>
-                  <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                    →
-                  </span>
-                </div>
-                <div class="relative px-8 py-4 text-primary/80 text-right flex items-center justify-end shrink-0">
-                  {new Date(post.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    timeZone: "UTC",
-                  })}
-                </div>
+        <For each={groupedByMonth()}>
+          {(group) => (
+            <div>
+              {/* Month Header */}
+              <div class="border-b border-primary py-3 px-4 font-medium bg-primary/5">
+                {group.monthYear}
               </div>
-            </a>
+
+              {/* Posts in this month */}
+              <For each={group.posts}>
+                {(post) => (
+                  <div class="py-3 px-4 flex items-baseline">
+                    <span class="text-primary w-16 pl-2 flex-shrink-0 whitespace-nowrap">
+                      {formatDate(post.date)}
+                    </span>
+                    <div class="group flex items-center min-w-0">
+                      <a
+                        href={`/blog/${post.slug}`}
+                        class="text-primary hover:underline"
+                      >
+                        {post.title}
+                      </a>
+                      <span class="ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-primary flex-shrink-0">
+                        →
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </For>
+            </div>
           )}
         </For>
-      </div>
+      </Show>
     </div>
   );
 }

@@ -33,6 +33,7 @@ export default function BlogSubmit() {
   const [uploadStatus, setUploadStatus] = createSignal<
     "idle" | "uploading" | "error"
   >("idle");
+  const [customPercentage, setCustomPercentage] = createSignal(50);
   let ref!: HTMLDivElement;
   let toolbarRef!: HTMLDivElement;
   let linkInputRef!: HTMLInputElement;
@@ -120,6 +121,15 @@ export default function BlogSubmit() {
             },
             style: {
               default: null,
+              parseHTML: (element) => element.getAttribute("style"),
+              renderHTML: (attributes) => {
+                if (!attributes.style) {
+                  return {};
+                }
+                return {
+                  style: attributes.style,
+                };
+              },
             },
             caption: {
               default: null,
@@ -385,6 +395,7 @@ export default function BlogSubmit() {
     if (!img) return;
 
     let className = "";
+    let style = "";
 
     // Set size classes
     switch (imageSize()) {
@@ -399,6 +410,9 @@ export default function BlogSubmit() {
         break;
       case "full":
         className += "w-full ";
+        break;
+      case "custom":
+        style = `width: ${customPercentage()}%;`;
         break;
     }
 
@@ -423,6 +437,7 @@ export default function BlogSubmit() {
         attrs: {
           src: img.src,
           class: className,
+          style,
           caption: imageCaption() || null,
         },
       })
@@ -713,16 +728,47 @@ export default function BlogSubmit() {
 
               <div>
                 <label class="block text-primary mb-2">Size</label>
-                <select
-                  value={imageSize()}
-                  onChange={(e) => setImageSize(e.currentTarget.value)}
-                  class="w-full p-2 bg-background-light border border-primary text-primary rounded"
-                >
-                  <option value="small">Small</option>
-                  <option value="medium">Medium</option>
-                  <option value="large">Large</option>
-                  <option value="full">Full Width</option>
-                </select>
+                <div class="space-y-2">
+                  <select
+                    value={imageSize()}
+                    onChange={(e) => {
+                      setImageSize(e.currentTarget.value);
+                      const img = selectedImage();
+                      if (img) {
+                        setImageAlignment(
+                          getDefaultAlignment(img, e.currentTarget.value)
+                        );
+                      }
+                    }}
+                    class="w-full p-2 bg-background-light border border-primary text-primary rounded"
+                  >
+                    <option value="small">Small (25%)</option>
+                    <option value="medium">Medium (50%)</option>
+                    <option value="large">Large (75%)</option>
+                    <option value="full">Full Width</option>
+                    <option value="custom">Custom Percentage</option>
+                  </select>
+
+                  <Show when={imageSize() === "custom"}>
+                    <div class="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={customPercentage()}
+                        onInput={(e) => {
+                          const val = parseInt(e.currentTarget.value);
+                          if (val >= 1 && val <= 100) {
+                            setCustomPercentage(val);
+                          }
+                        }}
+                        class="flex-1 p-2 bg-background-light border border-primary text-primary rounded"
+                        placeholder="Enter percentage"
+                      />
+                      <span class="text-primary">%</span>
+                    </div>
+                  </Show>
+                </div>
               </div>
 
               <div class="flex gap-4 mt-6">
@@ -756,24 +802,47 @@ export default function BlogSubmit() {
 
               <div>
                 <label class="block text-primary mb-2">Size</label>
-                <select
-                  value={imageSize()}
-                  onChange={(e) => {
-                    setImageSize(e.currentTarget.value);
-                    const img = selectedImage();
-                    if (img) {
-                      setImageAlignment(
-                        getDefaultAlignment(img, e.currentTarget.value)
-                      );
-                    }
-                  }}
-                  class="w-full p-2 bg-background-light border border-primary text-primary rounded"
-                >
-                  <option value="small">Small (25%)</option>
-                  <option value="medium">Medium (50%)</option>
-                  <option value="large">Large (75%)</option>
-                  <option value="full">Full Width</option>
-                </select>
+                <div class="space-y-2">
+                  <select
+                    value={imageSize()}
+                    onChange={(e) => {
+                      setImageSize(e.currentTarget.value);
+                      const img = selectedImage();
+                      if (img) {
+                        setImageAlignment(
+                          getDefaultAlignment(img, e.currentTarget.value)
+                        );
+                      }
+                    }}
+                    class="w-full p-2 bg-background-light border border-primary text-primary rounded"
+                  >
+                    <option value="small">Small (25%)</option>
+                    <option value="medium">Medium (50%)</option>
+                    <option value="large">Large (75%)</option>
+                    <option value="full">Full Width</option>
+                    <option value="custom">Custom Percentage</option>
+                  </select>
+
+                  <Show when={imageSize() === "custom"}>
+                    <div class="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={customPercentage()}
+                        onInput={(e) => {
+                          const val = parseInt(e.currentTarget.value);
+                          if (val >= 1 && val <= 100) {
+                            setCustomPercentage(val);
+                          }
+                        }}
+                        class="flex-1 p-2 bg-background-light border border-primary text-primary rounded"
+                        placeholder="Enter percentage"
+                      />
+                      <span class="text-primary">%</span>
+                    </div>
+                  </Show>
+                </div>
               </div>
 
               <div>

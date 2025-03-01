@@ -1,5 +1,5 @@
 import { createResource, Show } from "solid-js";
-import { useParams } from "@solidjs/router";
+import { useParams, A } from "@solidjs/router";
 import Navbar from "../components/NavBar";
 import { marked } from "marked";
 
@@ -75,6 +75,13 @@ export default function BlogPost() {
       >
         {/* Content */}
         <div class="px-8 py-12 max-w-4xl mx-auto">
+          <div class="mb-8">
+            <A href="/blog" class="inline-flex items-center text-primary group">
+              <span class="mr-1">←</span>
+              <span class="hover:underline">Blog</span>
+            </A>
+          </div>
+
           <h1 class="text-4xl text-primary mb-8 font-headline font-semibold">
             {data()?.post.title}
           </h1>

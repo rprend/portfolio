@@ -1,6 +1,5 @@
 import { lazy } from "solid-js";
 import type { RouteDefinition } from "@solidjs/router";
-import { blogRoutes } from "./utils/blogRoutes";
 
 import Home from "./pages/home";
 import Blog from "./pages/blog";
