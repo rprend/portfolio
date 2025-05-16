@@ -14,7 +14,7 @@ const config: Config = {
         body: ["Space Grotesk", "sans-serif"],
       },
       fontSize: {
-        headline: ["8vw", "1"], // For responsive headline
+        headline: ["4vw", "1"], // For responsive headline
         "headline-mobile": ["12vw", "1"],
       },
       borderRadius: {

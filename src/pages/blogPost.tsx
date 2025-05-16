@@ -49,7 +49,7 @@ const blogStyles = `
 `;
 
 const SkeletonLoader = () => (
-  <div class="px-8 py-12 max-w-3xl mx-auto animate-pulse">
+  <div class="px-8 py-12 max-w-3xl animate-pulse">
     <div class="mb-8">
       <div class="inline-flex items-center">
         <div class="w-20 h-6 bg-primary/10 rounded"></div>
@@ -157,7 +157,7 @@ export default function BlogPost() {
         }
       >
         {/* Content */}
-        <div class="px-8 py-12 max-w-3xl mx-auto fade-in">
+        <div class="px-8 py-12 max-w-3xl fade-in">
           <div class="mb-8">
             <A href="/blog" class="inline-flex items-center text-primary group">
               <span class="mr-1">←</span>

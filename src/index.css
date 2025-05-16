@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  p.text-lg {
+    line-height: 2rem;
+  }
+
+  p.text-xl {
+    line-height: 2.5rem;
+  }
+}

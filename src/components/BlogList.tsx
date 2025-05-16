@@ -105,7 +105,7 @@ export default function BlogList() {
 
   const SkeletonLoader = () => (
     <div class="animate-pulse">
-      <div class="flex justify-end border-y border-primary py-2 px-4">
+      <div class="flex">
         <div class="h-8 w-28 bg-primary/10 rounded"></div>
       </div>
 
@@ -165,10 +165,10 @@ export default function BlogList() {
         }
       >
         <div class="fade-in">
-          <div class="flex justify-end border-y border-primary py-2 px-4">
+          <div class="flex">
             <button
               onClick={toggleSortDirection}
-              class="text-sm text-primary font-medium flex items-center gap-2 hover:bg-primary/5 px-3 py-1 rounded transition-colors"
+              class="text-sm text-primary font-medium flex items-center gap-2 hover:underline py-1 rounded transition-colors"
             >
               <span>Sort by Date</span>
               <span>{getSortIcon()}</span>
