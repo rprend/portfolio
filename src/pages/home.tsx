@@ -45,6 +45,18 @@ export default function Home() {
           sentence: "alien dropped on earth writes a movie review to remember
           what he sees."
         </p>
+        <p class="text-lg text-primary mb-4">
+          I like to meet new people, and I'm especially interested in people
+          with niche problems or professions. My calendar is open at{" "}
+          <a
+            href="https://calendly.com/rprendergast1121/ryan"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            calendly.com/rprendergast1121/ryan
+          </a>
+          .
+        </p>
       </main>
     </div>
   );

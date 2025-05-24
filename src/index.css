@@ -10,4 +10,13 @@
   p.text-xl {
     line-height: 2.5rem;
   }
+
+  /* Fix quotation marks globally */
+  body {
+    font-feature-settings:
+      "kern" 1,
+      "liga" 1,
+      "calt" 1,
+      "dlig" 1;
+  }
 }
