@@ -52,6 +52,7 @@ export default function Home() {
             href="https://calendly.com/rprendergast1121/ryan"
             target="_blank"
             rel="noopener noreferrer"
+            class="hover:opacity-80 underline transition-opacity"
           >
             calendly.com/rprendergast1121/ryan
           </a>
